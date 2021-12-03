@@ -22,8 +22,13 @@ class Engine
 
     def action_map
         {
+            'REGENERATE' => Action.new(display.world.method(:regenerate)),
             'ZOOM_IN' => Action.new(display.world.method(:zoom_in)),
             'ZOOM_OUT' => Action.new(display.world.method(:zoom_out)),
+            'SCROLL_UP' => Action.new(method(:default_action)),
+            'SCROLL_RIGHT' => Action.new(method(:default_action)),
+            'SCROLL_DOWN' => Action.new(method(:default_action)),
+            'SCROLL_LEFT' => Action.new(method(:default_action)),
             'QUIT' => Action.new(method(:stop)),
         }
     end

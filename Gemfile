@@ -7,3 +7,5 @@ gem "tty-cursor"
 gem "tty-box"
 gem "tty-screen"
 gem "pastel"
+
+gem "perlin_noise", "~> 0.1.3"
