@@ -1,3 +1,5 @@
+require_relative './Action.rb'
+
 class Engine
     def initialize(prompt, display)
         @running = false
@@ -14,16 +16,16 @@ class Engine
     end
 
     def proccess_answer(answer)
-        case answer
-        when 'ZOOM_IN' 
-            display.world.zoom_in
-        when 'ZOOM_OUT' 
-            display.world.zoom_out
-        when 'QUIT' 
-            stop
-        else 
-            stop
-        end
+        action = action_map[answer]
+        action.call
+    end
+
+    def action_map
+        {
+            'ZOOM_IN' => Action.new(display.world.method(:zoom_in)),
+            'ZOOM_OUT' => Action.new(display.world.method(:zoom_out)),
+            'QUIT' => Action.new(method(:stop)),
+        }
     end
 
     def default_action
@@ -31,7 +33,7 @@ class Engine
     end
 
     def get_answer
-        prompt.select("", %w(ZOOM_IN ZOOM_OUT QUIT))
+        prompt.select('', action_map.keys)
     end
 
     def prompt
