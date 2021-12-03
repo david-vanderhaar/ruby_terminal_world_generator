@@ -1,6 +1,6 @@
 # Ruby World Generator
 
-This project exists to aid my growth in writing clean, testable, object-oriented ruby code.
+This project exists to aid my growth in writing clean, object-oriented ruby code.
 
 The user will be able to run this program from the terminal and generate interesting and beautiful world maps using text and color.
 
@@ -13,6 +13,6 @@ The user can:
  - label and name tiles in the world
 
  ## Run it!
- 
+
  `$ bundle install`     
  `$ bundle exec ruby lib/run.rb`        
