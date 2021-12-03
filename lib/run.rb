@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 require 'tty-prompt'
 require_relative './Display.rb'
 require_relative './Engine.rb'

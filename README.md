@@ -15,4 +15,14 @@ The user can:
  ## Run it!
 
  `$ bundle install`     
- `$ bundle exec ruby lib/run.rb`        
+ `$ bundle exec ruby lib/run.rb`     
+
+ ## What I've Learned During Development
+
+ - Ruby syntax
+    - `%w(item item item)` == `["item", "item", "item"]`
+    - `method(:method_symbol)` allows us to pass methods as variables and call them later
+- Defining Modules
+- TTY libraries for nice terminal functionality
+- Installing gems locally with bundle config
+- Executing ruby with specific bundles: `bundle exec ...`
