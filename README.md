@@ -11,3 +11,8 @@ The user can:
  - scroll along the x/y axis to explore the world
  - Zoom in/and out to explore the world
  - label and name tiles in the world
+
+ ## Run it!
+ 
+ `$ bundle install`     
+ `$ bundle exec ruby lib/run.rb`        
