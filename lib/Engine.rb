@@ -51,10 +51,10 @@ class Engine
             'r' => Action.new(display.world.method(:regenerate)),
             'z' => Action.new(display.world.method(:zoom_in)),
             'x' => Action.new(display.world.method(:zoom_out)),
-            :up => Action.new(method(:default_action)), # scroll up
-            :down => Action.new(method(:default_action)), # scroll down
+            :up => Action.new(display.world.method(:scroll_up)), # scroll up
+            :down => Action.new(display.world.method(:scroll_down)), # scroll down
             :right => Action.new(display.world.method(:scroll_right)), # scroll right
-            :left => Action.new(method(:default_action)), # scroll left
+            :left => Action.new(display.world.method(:scroll_left)), # scroll left
         }
     end
 

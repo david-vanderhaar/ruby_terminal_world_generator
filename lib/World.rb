@@ -180,6 +180,9 @@ class World
 
     def zoom_out
         new_position = decrement_z_level(@current_position)
+        if !matrix_exists_in_position(new_position)
+            generate_new_zoomed_out_map(new_position)
+        end
 
         @current_position = new_position
     end
@@ -188,6 +191,33 @@ class World
         new_position = increment_x_level(@current_position)
         if !matrix_exists_in_position(new_position)
             generate_new_scrolled_right_map(new_position)
+        end
+
+        @current_position = new_position
+    end
+
+    def scroll_left
+        new_position = decrement_x_level(@current_position)
+        if !matrix_exists_in_position(new_position)
+            generate_new_scrolled_left_map(new_position)
+        end
+
+        @current_position = new_position
+    end
+    
+    def scroll_up
+        new_position = increment_y_level(@current_position)
+        if !matrix_exists_in_position(new_position)
+            generate_new_scrolled_up_map(new_position)
+        end
+
+        @current_position = new_position
+    end
+    
+    def scroll_down
+        new_position = decrement_y_level(@current_position)
+        if !matrix_exists_in_position(new_position)
+            generate_new_scrolled_down_map(new_position)
         end
 
         @current_position = new_position
@@ -261,6 +291,21 @@ class World
 
         @matrix_map[position.to_s] = filled_new_matrix
     end
+    
+    def generate_new_zoomed_out_map(position)
+        new_matrix = []
+        matrix.each_with_index{ |row, i|
+            if i.even?
+                new_row = []
+                matrix[i].each_with_index{ |tile, j|
+                    new_row << tile if j.even?
+                }
+                new_matrix << new_row
+            end
+          }
+        
+        @matrix_map[position.to_s] = new_matrix
+    end
 
     def generate_new_scrolled_right_map(position)
         unfilled_new_matrix = matrix.dup.map.with_index{ |row, y|
@@ -270,6 +315,46 @@ class World
             
             new_row
         }
+
+        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
+
+        @matrix_map[position.to_s] = filled_new_matrix
+    end
+    
+    def generate_new_scrolled_left_map(position)
+        unfilled_new_matrix = matrix.dup.map.with_index{ |row, y|
+            new_row = row.dup
+            new_row.pop
+            new_row.unshift(Constants::TILE_TYPES[:NONE])
+            
+            new_row
+        }
+
+        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
+
+        @matrix_map[position.to_s] = filled_new_matrix
+    end
+
+    def generate_new_scrolled_up_map(position)
+        unfilled_new_matrix = []
+        matrix.dup.map.with_index{ |row, i|
+            unfilled_new_matrix << row.dup if i < (current_matrix_width - 1)
+        }
+
+        unfilled_new_matrix.unshift(new_row(current_matrix_width))
+
+        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
+
+        @matrix_map[position.to_s] = filled_new_matrix
+    end
+    
+    def generate_new_scrolled_down_map(position)
+        unfilled_new_matrix = []
+        matrix.dup.map.with_index{ |row, i|
+            unfilled_new_matrix << row.dup if i > 0
+        }
+
+        unfilled_new_matrix << new_row(current_matrix_width)
 
         filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
 
