@@ -8,11 +8,23 @@ class Engine
     end
 
     def run
+        initialize_key_prompt
+        while is_running
+            display.draw
+            show_key_prompts
+        end
+    end
+    
+    def run_v1
         while is_running
             display.draw
             answer = get_answer
             proccess_answer(answer)
         end
+    end
+
+    def get_answer
+        prompt.select('', action_map.keys, cycle: true)
     end
 
     def proccess_answer(answer)
@@ -33,12 +45,42 @@ class Engine
         }
     end
 
-    def default_action
-        return true
+    def key_map
+        {
+            'q' => Action.new(method(:stop)),
+            'r' => Action.new(display.world.method(:regenerate)),
+            'z' => Action.new(display.world.method(:zoom_in)),
+            'x' => Action.new(display.world.method(:zoom_out)),
+            :up => Action.new(method(:default_action)), # scroll up
+            :down => Action.new(method(:default_action)), # scroll down
+            :right => Action.new(display.world.method(:scroll_right)), # scroll right
+            :left => Action.new(method(:default_action)), # scroll left
+        }
     end
 
-    def get_answer
-        prompt.select('', action_map.keys)
+    def initialize_key_prompt
+        prompt.on(:keypress) { |event| 
+            event_key = event.value
+            event_name = event.key.name
+            key_map[event_key].call if key_map.keys.include?(event_key)
+            key_map[event_name].call if key_map.keys.include?(event_name)
+        }
+    end
+
+    def show_key_prompts
+        prompt.keypress(
+            [
+                "r to generate new world",
+                "arrow keys to explore",
+                "z to zoom in",
+                "x to zoom out",
+                "q to quit",
+            ].join("\n")
+        )
+    end
+
+    def default_action
+        return true
     end
 
     def prompt

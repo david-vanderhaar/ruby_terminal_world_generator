@@ -3,22 +3,42 @@ require 'tty-box'
 require 'perlin_noise'
 require_relative './constants/tile_types.rb'
 
+class Point
+    attr_reader :x, :y, :z
+
+    def initialize(x, y, z)
+        @x = x
+        @y = y
+        @z = z
+    end
+
+    def to_s
+        "#{@x},#{@y},#{@z}"
+    end
+
+end
+
 class World
     def initialize(theme)
         @theme = theme
         @pastel = pastel = Pastel.new
-        @max_zoom_level = 4
+        @max_x = 4
+        @max_y = 4
+        @max_z = 4
         regenerate
     end
 
     def regenerate
         @matrix = initialize_matrix
-        @zoom_history = [@matrix]
-        @zoom_level = 0
+        @current_position = Point.new(0, 0, 0)
+
+        @matrix_map = {
+            @current_position.to_s => @matrix
+        }
     end
 
     def matrix
-        @zoom_history[@zoom_level]
+        @matrix_map[@current_position.to_s]
     end
 
     def colored_matrix
@@ -66,7 +86,7 @@ class World
           bars[ (bars.length * n).floor ]
         }
         
-        matrix = []
+        perlin_matrix = []
 
         size.times do |x|
             row = []
@@ -77,10 +97,10 @@ class World
                 row << bar.call(n)
             end
 
-            matrix << row
+            perlin_matrix << row
         end
 
-        matrix
+        perlin_matrix
     end
 
     def draw(tile_size)
@@ -122,11 +142,15 @@ class World
     end
 
     def render_frame_around_map(map)
-        zoom_information = " Zoom: #{@zoom_level} "
+        zoom_information = " Zoom: #{@current_position.z} "
+        coordinates = " x: #{@current_position.x}, y: #{@current_position.y} "
 
         framed_map = TTY::Box.frame(
             align: :center,
-            title: {bottom_right: zoom_information},
+            title: {
+                bottom_left: coordinates,
+                bottom_right: zoom_information
+            },
             border: :thick
         ) { map }
 
@@ -141,40 +165,118 @@ class World
         (current_matrix_width * 2) - 1
     end
 
-    def zoom_in
-        generate_new_zoom if @zoom_level == @zoom_history.length - 1
-        increment_zoom_level
+    def matrix_exists_in_position(position)
+        @matrix_map.keys.include?(position.to_s)
     end
 
-    def generate_new_zoom
+    def zoom_in
+        new_position = increment_z_level(@current_position)
+        if !matrix_exists_in_position(new_position)
+            generate_new_zoomed_in_map(new_position)
+        end
+
+        @current_position = new_position
+    end
+
+    def zoom_out
+        new_position = decrement_z_level(@current_position)
+
+        @current_position = new_position
+    end
+
+    def scroll_right
+        new_position = increment_x_level(@current_position)
+        if !matrix_exists_in_position(new_position)
+            generate_new_scrolled_right_map(new_position)
+        end
+
+        @current_position = new_position
+    end
+
+    def increment_x_level(position)
+        add_to_x_level(1, position)
+    end
+
+    def decrement_x_level(position)
+        add_to_x_level(-1, position)
+    end
+
+    def increment_y_level(position)
+        add_to_y_level(1, position)
+    end
+
+    def decrement_y_level(position)
+        add_to_y_level(-1, position)
+    end
+
+    def increment_z_level(position)
+        add_to_z_level(1, position)
+    end
+
+    def decrement_z_level(position)
+        add_to_z_level(-1, position)
+    end
+
+    def add_to_x_level(amount, position)
+        new_x = (position.x + amount).clamp(-@max_x, @max_x)
+        
+        Point.new(
+            new_x,
+            position.y,
+            position.z,
+        )
+    end
+
+    def add_to_y_level(amount, position)
+        new_y = (position.y + amount).clamp(-@max_y, @max_y)
+        
+        Point.new(
+            position.x,
+            new_y,
+            position.z,
+        )
+    end
+
+    def add_to_z_level(amount, position)
+        new_z = (position.z + amount).clamp(0, @max_z)
+        
+        Point.new(
+            position.x,
+            position.y,
+            new_z,
+        )
+    end
+
+    def generate_new_zoomed_in_map(position)
         zoom_length = next_matrix_width
         unfilled_new_matrix = []
         matrix.each_with_index{ |row, i|
-            unfilled_new_matrix << expand_row(zoom_length, matrix[i])
+            unfilled_new_matrix << expanded_row(zoom_length, matrix[i])
             if unfilled_new_matrix.length < zoom_length
-                unfilled_new_matrix << add_row(zoom_length)
+                unfilled_new_matrix << new_row(zoom_length)
             end
           }
         
         filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
-        @matrix = filled_new_matrix
 
-        @zoom_history << filled_new_matrix
+        @matrix_map[position.to_s] = filled_new_matrix
     end
 
-    def zoom_out
-        decrement_zoom_level
+    def generate_new_scrolled_right_map(position)
+        unfilled_new_matrix = matrix.dup.map.with_index{ |row, y|
+            new_row = row.dup
+            new_row.shift
+            new_row << Constants::TILE_TYPES[:NONE]
+            
+            new_row
+        }
+
+        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
+
+        @matrix_map[position.to_s] = filled_new_matrix
     end
 
-    def increment_zoom_level
-        @zoom_level = (@zoom_level + 1).clamp(0, @max_zoom_level)
-    end
-
-    def decrement_zoom_level
-        @zoom_level = (@zoom_level - 1).clamp(0, @max_zoom_level)
-    end
-
-    def expand_row(zoom_length, current_row)
+    def expanded_row(zoom_length, current_row)
         new_row = []
         current_row.each_with_index{ |row, i|
           new_row << current_row[i]
@@ -186,7 +288,7 @@ class World
         new_row
     end
 
-    def add_row(zoom_length)
+    def new_row(zoom_length)
         return Array.new(zoom_length, Constants::TILE_TYPES[:NONE])
     end
 
