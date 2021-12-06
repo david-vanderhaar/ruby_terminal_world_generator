@@ -1,5 +1,7 @@
 source "https://rubygems.org"
 
+ruby '~> 2.7.0'
+
 gem "tty-prompt"
 gem "tty-table"
 gem "tty-font"

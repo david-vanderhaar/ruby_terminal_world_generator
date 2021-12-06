@@ -21,7 +21,7 @@ end
 class World
     def initialize(theme)
         @theme = theme
-        @pastel = pastel = Pastel.new
+        @pastel = Pastel.new
         @max_x = 4
         @max_y = 4
         @max_z = 4
@@ -104,17 +104,31 @@ class World
     end
 
     def draw(tile_size)
-        puts render_framed_map(tile_size)
+        # puts render_framed_map(tile_size)
         # puts render_framed_table_map(tile_size)
         # puts render_map(tile_size)
+        puts render_map_with_info(tile_size)
         # puts render_table_map(tile_size)
+    end
+
+    def render_map_with_info(tile_size)
+        [
+            render_map(tile_size),
+            zoom_level_display,
+            coordinates_display,
+        ].join("\n")
     end
 
     def render_map(tile_size)
         colored_matrix.map.with_index { |row, y|
             row.map.with_index { |tile, x|
                 tile
-            }.join(' ' * tile_size)
+            }.join(
+                @theme.colored_tile(
+                    @pastel, 
+                    Constants::TILE_TYPES[:BACKGROUND]
+                ) * tile_size
+            )
         }.join("\n" * tile_size)
     end
 
@@ -142,19 +156,24 @@ class World
     end
 
     def render_frame_around_map(map)
-        zoom_information = " Zoom: #{@current_position.z} "
-        coordinates = " x: #{@current_position.x}, y: #{@current_position.y} "
-
         framed_map = TTY::Box.frame(
             align: :center,
             title: {
-                bottom_left: coordinates,
-                bottom_right: zoom_information
+                bottom_left: coordinates_display,
+                bottom_right: zoom_level_display
             },
             border: :thick
         ) { map }
 
         framed_map
+    end
+
+    def zoom_level_display
+        "Zoom: #{@current_position.z}"
+    end
+
+    def coordinates_display
+        "x: #{@current_position.x}, y: #{@current_position.y}"
     end
 
     def current_matrix_width

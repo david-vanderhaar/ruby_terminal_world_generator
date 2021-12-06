@@ -70,6 +70,8 @@ class Engine
     def show_key_prompts
         prompt.keypress(
             [
+                "",
+                "-----------------------",
                 "r to generate new world",
                 "arrow keys to explore",
                 "z to zoom in",
