@@ -2,28 +2,34 @@ module Constants
     module THEME
         module DEFAULT
             def DEFAULT.colored_tile(pastel_instance, tile_type)
-                character = DEFAULT.character_map[tile_type]
+                character = DEFAULT.tile_map(pastel_instance)[tile_type][:character]
+                color_method = DEFAULT.tile_map(pastel_instance)[tile_type][:color_method]
 
-                type_color_map = {
-                    Constants::TILE_TYPES[:BACKGROUND] => pastel_instance.black.on_black(character),
-                    Constants::TILE_TYPES[:NONE] => pastel_instance.black.on_black(character),
-                    Constants::TILE_TYPES[:WATER] => pastel_instance.blue.on_black(character),
-                    Constants::TILE_TYPES[:FOREST] => pastel_instance.green.on_black(character),
-                    Constants::TILE_TYPES[:MOUNTAIN] => pastel_instance.bright_white.on_black(character),
-                    Constants::TILE_TYPES[:PLAIN] => pastel_instance.bright_yellow.on_black(character),
-                }
-
-                type_color_map[tile_type]
+                color_method.call(character)
             end
 
-            def DEFAULT.character_map
+            def DEFAULT.tile_map(pastel_instance)
                 {
-                    Constants::TILE_TYPES[:BACKGROUND] => ' ',
-                    Constants::TILE_TYPES[:NONE] => ' ',
-                    Constants::TILE_TYPES[:WATER] => '■',
-                    Constants::TILE_TYPES[:FOREST] => '■',
-                    Constants::TILE_TYPES[:MOUNTAIN] => '■',
-                    Constants::TILE_TYPES[:PLAIN] => '■',
+                    Constants::TILE_TYPES[:NONE] => {
+                        character: ' ',
+                        color_method: pastel_instance.black.method(:on_black),
+                    },
+                    Constants::TILE_TYPES[:WATER] => {
+                        character: '■',
+                        color_method: pastel_instance.blue.method(:on_black),
+                    },
+                    Constants::TILE_TYPES[:FOREST] => {
+                        character: '■',
+                        color_method: pastel_instance.green.method(:on_black),
+                    },
+                    Constants::TILE_TYPES[:MOUNTAIN] => {
+                        character: '■',
+                        color_method: pastel_instance.bright_white.method(:on_black),
+                    },
+                    Constants::TILE_TYPES[:PLAIN] => {
+                        character: '■',
+                        color_method: pastel_instance.bright_yellow.method(:on_black),
+                    },
                 }
             end
         end

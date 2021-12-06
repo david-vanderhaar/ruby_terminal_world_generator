@@ -51,6 +51,7 @@ class Engine
             'r' => Action.new(display.world.method(:regenerate)),
             'z' => Action.new(display.world.method(:zoom_in)),
             'x' => Action.new(display.world.method(:zoom_out)),
+            'n' => Action.new(method(:name_world)),
             :up => Action.new(display.world.method(:scroll_up)), # scroll up
             :down => Action.new(display.world.method(:scroll_down)), # scroll down
             :right => Action.new(display.world.method(:scroll_right)), # scroll right
@@ -76,9 +77,16 @@ class Engine
                 "arrow keys to explore",
                 "z to zoom in",
                 "x to zoom out",
+                "n to rename this world",
                 "q to quit",
+                ""
             ].join("\n")
         )
+    end
+
+    def name_world
+        new_name = prompt.ask('what do people call this world?')
+        display.world.set_name(new_name)
     end
 
     def default_action

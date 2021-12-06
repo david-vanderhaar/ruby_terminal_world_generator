@@ -29,6 +29,7 @@ class World
     end
 
     def regenerate
+        @name = initialize_name
         @matrix = initialize_matrix
         @current_position = Point.new(0, 0, 0)
 
@@ -51,6 +52,50 @@ class World
 
     def initialize_matrix
         generate_perlin_maxtrix(4)
+    end
+
+    def initialize_name
+        generate_world_name
+    end
+
+    def generate_world_name
+        name = [
+            'Earth',
+            'Solace',
+            'Terra',
+            'Nova',
+            'Solida',
+            'Humus',
+            'Viridis',
+            'Orb',
+            'Solo',
+            'Lutum',
+            'Vita',
+        ].sample
+
+        adjective = [
+            '',
+            'Red',
+            'Green',
+            'Blue',
+            'Speckled',
+            'Spotted',
+        ].sample
+
+        suffix = [
+            '',
+            '',
+            '',
+            'One',
+            'Two',
+            'Seven',
+        ].sample
+
+        "#{adjective} #{name} #{suffix}"
+    end
+
+    def set_name(name)
+        @name = name
     end
 
     def two_lands_matrix
@@ -114,6 +159,7 @@ class World
     def render_map_with_info(tile_size)
         [
             render_map(tile_size),
+            world_name_display,
             zoom_level_display,
             coordinates_display,
         ].join("\n")
@@ -126,7 +172,7 @@ class World
             }.join(
                 @theme.colored_tile(
                     @pastel, 
-                    Constants::TILE_TYPES[:BACKGROUND]
+                    Constants::TILE_TYPES[:NONE]
                 ) * tile_size
             )
         }.join("\n" * tile_size)
@@ -166,6 +212,10 @@ class World
         ) { map }
 
         framed_map
+    end
+
+    def world_name_display
+        "You are exploring #{@pastel.italic(@name)}"
     end
 
     def zoom_level_display
