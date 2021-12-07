@@ -1,7 +1,8 @@
 require 'tty-table'
 require 'tty-box'
-require 'perlin_noise'
 require_relative './constants/tile_types.rb'
+require_relative './GenerateName.rb'
+require_relative './GenerateMatrix.rb'
 
 class Point
     attr_reader :x, :y, :z
@@ -51,101 +52,15 @@ class World
     end
 
     def initialize_matrix
-        generate_perlin_maxtrix(4)
+        GenerateMatrix.new.perlin_matrix(4)
     end
 
     def initialize_name
-        generate_world_name
-    end
-
-    def generate_world_name
-        name = [
-            'Earth',
-            'Solace',
-            'Terra',
-            'Nova',
-            'Solida',
-            'Humus',
-            'Viridis',
-            'Orb',
-            'Solo',
-            'Lutum',
-            'Vita',
-        ].sample
-
-        adjective = [
-            '',
-            'Red',
-            'Green',
-            'Blue',
-            'Speckled',
-            'Spotted',
-        ].sample
-
-        suffix = [
-            '',
-            '',
-            '',
-            'One',
-            'Two',
-            'Seven',
-        ].sample
-
-        "#{adjective} #{name} #{suffix}"
+        GenerateName.new.world
     end
 
     def set_name(name)
         @name = name
-    end
-
-    def two_lands_matrix
-        [
-            [Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:PLAIN]],
-            [Constants::TILE_TYPES[:PLAIN], Constants::TILE_TYPES[:PLAIN], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER]],
-            [Constants::TILE_TYPES[:FOREST], Constants::TILE_TYPES[:PLAIN], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER]],
-            [Constants::TILE_TYPES[:MOUNTAIN], Constants::TILE_TYPES[:FOREST], Constants::TILE_TYPES[:PLAIN], Constants::TILE_TYPES[:WATER]],
-        ]
-    end
-
-    def water_world_matrix
-        [
-            [Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER]],
-            [Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER]],
-            [Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER]],
-            [Constants::TILE_TYPES[:MOUNTAIN], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER], Constants::TILE_TYPES[:WATER]],
-        ]
-    end
-
-    def generate_perlin_maxtrix(size)
-        noises = Perlin::Noise.new(2)
-        contrast = Perlin::Curve.contrast(Perlin::Curve::CUBIC, 2)
-        
-        bars = [
-            Constants::TILE_TYPES[:WATER],
-            Constants::TILE_TYPES[:WATER],
-            Constants::TILE_TYPES[:PLAIN],
-            Constants::TILE_TYPES[:FOREST],
-            Constants::TILE_TYPES[:MOUNTAIN],
-        ]
-        bar = lambda { |n|
-          bars[ (bars.length * n).floor ]
-        }
-        
-        perlin_matrix = []
-
-        size.times do |x|
-            row = []
-            size.times do |y|
-                n = noises[x * 0.2, y * 0.2]
-                n = contrast.call n
-            
-                row << bar.call(n)
-            end
-
-            perlin_matrix << row
-        end
-
-        perlin_matrix
     end
 
     def draw(tile_size)
