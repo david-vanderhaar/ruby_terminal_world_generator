@@ -1,8 +1,10 @@
 require 'tty-table'
 require 'tty-box'
 require_relative './constants/tile_types.rb'
+require_relative './constants/themes/black_white.rb'
 require_relative './GenerateName.rb'
 require_relative './GenerateMatrix.rb'
+
 
 class Point
     attr_reader :x, :y, :z
@@ -20,6 +22,8 @@ class Point
 end
 
 class World
+    attr_reader :name
+
     def initialize(theme)
         @theme = theme
         @pastel = Pastel.new
@@ -43,12 +47,16 @@ class World
         @matrix_map[@current_position.to_s]
     end
 
-    def colored_matrix
+    def themed_matrix(theme)
         matrix.map{ |row|
             row.map{ |tile|
-                @theme.colored_tile(@pastel, tile)
+                theme.colored_tile(@pastel, tile)
             }
         }
+    end
+ 
+    def colored_matrix
+        themed_matrix(@theme)
     end
 
     def initialize_matrix
@@ -80,17 +88,28 @@ class World
         ].join("\n")
     end
 
-    def render_map(tile_size)
-        colored_matrix.map.with_index { |row, y|
+    def render_matrix(matrix_to_render, theme, tile_size)
+        matrix_to_render.map.with_index { |row, y|
             row.map.with_index { |tile, x|
                 tile
             }.join(
-                @theme.colored_tile(
+                theme.colored_tile(
                     @pastel, 
                     Constants::TILE_TYPES[:NONE]
                 ) * tile_size
             )
         }.join("\n" * tile_size)
+    end
+
+    def render_map_as_text(tile_size)
+        theme = Constants::THEME::BLACKWHITE
+        new_matrix = themed_matrix(theme)
+        
+        render_matrix(new_matrix, theme, tile_size)
+    end
+
+    def render_map(tile_size)
+        render_matrix(colored_matrix, @theme, tile_size)
     end
 
     def render_table_map(tile_size)

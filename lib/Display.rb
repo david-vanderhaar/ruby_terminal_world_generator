@@ -1,4 +1,5 @@
 require_relative './constants/themes/default.rb'
+require_relative './constants/themes/black_white.rb'
 require_relative './World.rb'
 
 class Display
@@ -21,7 +22,7 @@ class Display
     end
 
     def initialize_world
-        World.new(Constants::THEME::DEFAULT)
+        World.new(Constants::THEME::BLACKWHITE)
     end
 
     def world

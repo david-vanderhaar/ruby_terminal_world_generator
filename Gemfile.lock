@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    diff-lcs (1.4.4)
     pastel (0.8.0)
       tty-color (~> 0.5)
     perlin_noise (0.1.3)
@@ -15,6 +16,10 @@ GEM
       tty-cursor (~> 0.7)
     tty-color (0.6.0)
     tty-cursor (0.7.1)
+    tty-file (0.10.0)
+      diff-lcs (~> 1.3)
+      pastel (~> 0.8)
+      tty-prompt (~> 0.22)
     tty-font (0.5.0)
     tty-prompt (0.23.1)
       pastel (~> 0.8)
@@ -40,6 +45,7 @@ DEPENDENCIES
   perlin_noise (~> 0.1.3)
   tty-box
   tty-cursor
+  tty-file
   tty-font
   tty-prompt
   tty-screen

@@ -8,6 +8,7 @@ gem "tty-font"
 gem "tty-cursor"
 gem "tty-box"
 gem "tty-screen"
+gem "tty-file"
 gem "pastel"
 
 gem "perlin_noise", "~> 0.1.3"

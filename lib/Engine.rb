@@ -1,3 +1,5 @@
+require 'tty-file'
+require 'date'
 require_relative './Action.rb'
 
 class Engine
@@ -34,9 +36,9 @@ class Engine
 
     def action_map
         {
-            'REGENERATE' => Action.new(display.world.method(:regenerate)),
-            'ZOOM_IN' => Action.new(display.world.method(:zoom_in)),
-            'ZOOM_OUT' => Action.new(display.world.method(:zoom_out)),
+            'REGENERATE' => Action.new(world.method(:regenerate)),
+            'ZOOM_IN' => Action.new(world.method(:zoom_in)),
+            'ZOOM_OUT' => Action.new(world.method(:zoom_out)),
             'SCROLL_UP' => Action.new(method(:default_action)),
             'SCROLL_RIGHT' => Action.new(method(:default_action)),
             'SCROLL_DOWN' => Action.new(method(:default_action)),
@@ -48,14 +50,15 @@ class Engine
     def key_map
         {
             'q' => Action.new(method(:stop)),
-            'r' => Action.new(display.world.method(:regenerate)),
-            'z' => Action.new(display.world.method(:zoom_in)),
-            'x' => Action.new(display.world.method(:zoom_out)),
+            'r' => Action.new(world.method(:regenerate)),
+            'z' => Action.new(world.method(:zoom_in)),
+            'x' => Action.new(world.method(:zoom_out)),
             'n' => Action.new(method(:name_world)),
-            :up => Action.new(display.world.method(:scroll_up)), # scroll up
-            :down => Action.new(display.world.method(:scroll_down)), # scroll down
-            :right => Action.new(display.world.method(:scroll_right)), # scroll right
-            :left => Action.new(display.world.method(:scroll_left)), # scroll left
+            'e' => Action.new(method(:export_to_txt)),
+            :up => Action.new(world.method(:scroll_up)), # scroll up
+            :down => Action.new(world.method(:scroll_down)), # scroll down
+            :right => Action.new(world.method(:scroll_right)), # scroll right
+            :left => Action.new(world.method(:scroll_left)), # scroll left
         }
     end
 
@@ -78,6 +81,7 @@ class Engine
                 "z to zoom in",
                 "x to zoom out",
                 "n to rename this world",
+                "e to save this world in text",
                 "q to quit",
                 ""
             ].join("\n")
@@ -86,7 +90,17 @@ class Engine
 
     def name_world
         new_name = prompt.ask('what do people call this world?')
-        display.world.set_name(new_name)
+        world.set_name(new_name)
+    end
+
+    def export_to_txt
+        content = world.render_map_as_text(display.tile_size)
+
+        directory = "exported_worlds"
+        extension = 'txt'
+        file_name = "#{DateTime.now.strftime('%Y_%m_%d__%H%M%S')}__#{world.name}.txt".gsub!(" ","_")
+
+        TTY::File.create_file("#{directory}/#{file_name}", content)
     end
 
     def default_action
@@ -99,6 +113,10 @@ class Engine
 
     def display
         @display
+    end
+
+    def world
+        @display.world
     end
 
     def start
