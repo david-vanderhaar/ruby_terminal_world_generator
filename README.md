@@ -12,12 +12,17 @@ The user can:
  - Zoom in/and out to explore the world
  - label and name tiles in the world
 
- ## Run it!
+## Run it!
 
- `$ bundle install`     
- `$ bundle exec ruby lib/run.rb`     
+`$ bundle install`     
+`$ bundle exec ruby lib/run.rb`    
 
- ## What I've Learned During Development
+## Install it as a gem
+`gem install 'world_in_your_terminal'`     
+Then require it: `require 'world_in_your_terminal'`     
+Then run it: `WorldInYourTerminal.new.explore`
+
+## What I've Learned During Development
 
  - Ruby syntax
     - `%w(item item item)` == `["item", "item", "item"]`
@@ -26,3 +31,4 @@ The user can:
 - TTY libraries for nice terminal functionality
 - Installing gems locally with bundle config
 - Executing ruby with specific bundles: `bundle exec ...`
+- Packaging and publishing code as a ruby gem
