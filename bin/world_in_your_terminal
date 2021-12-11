@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'world_in_your_terminal'
+
+WorldInYourTerminal.new.explore

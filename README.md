@@ -12,15 +12,22 @@ The user can:
  - Zoom in/and out to explore the world
  - label and name tiles in the world
 
-## Run it!
+## Run it yourself!
 
 `$ bundle install`     
-`$ bundle exec ruby lib/run.rb`    
+`$ bundle exec ruby lib/run.rb`     
 
-## Install it as a gem
-`gem install 'world_in_your_terminal'`     
-Then require it: `require 'world_in_your_terminal'`     
-Then run it: `WorldInYourTerminal.new.explore`
+## Or install it as a gem
+`$ gem install 'world_in_your_terminal'`   
+
+After install you can either:
+
+- Run it as a command line tool: `$ world_in_your_terminal`      
+- Import it into you own script: 
+```
+require 'world_in_your_terminal'
+WorldInYourTerminal.new.explore
+```      
 
 ## What I've Learned During Development
 
@@ -30,5 +37,6 @@ Then run it: `WorldInYourTerminal.new.explore`
 - Defining Modules
 - TTY libraries for nice terminal functionality
 - Installing gems locally with bundle config
-- Executing ruby with specific bundles: `bundle exec ...`
+- Executing ruby code with specific bundles: `bundle exec ...`
 - Packaging and publishing code as a ruby gem
+- Allowing ruby code to be executed as a command in the terminal
