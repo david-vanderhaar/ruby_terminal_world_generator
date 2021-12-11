@@ -15,7 +15,7 @@ The user can:
 ## Run it yourself!
 
 `$ bundle install`     
-`$ bundle exec ruby lib/run.rb`     
+`$ bundle exec ruby run.rb`     
 
 ## Or install it as a gem
 `$ gem install 'world_in_your_terminal'`   
