@@ -1,6 +1,6 @@
 require 'tty-file'
 require 'date'
-require_relative './sction.rb'
+require_relative './action.rb'
 require_relative './alert_system.rb'
 
 class Engine
