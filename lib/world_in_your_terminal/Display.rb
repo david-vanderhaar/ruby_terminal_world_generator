@@ -1,6 +1,6 @@
 require_relative './constants/themes/default.rb'
 require_relative './constants/themes/black_white.rb'
-require_relative './World.rb'
+require_relative './world.rb'
 
 class Display
     def initialize(screen_size)

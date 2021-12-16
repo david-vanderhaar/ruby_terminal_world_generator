@@ -2,8 +2,8 @@ require 'tty-table'
 require 'tty-box'
 require_relative './constants/tile_types.rb'
 require_relative './constants/themes/black_white.rb'
-require_relative './GenerateName.rb'
-require_relative './GenerateMatrix.rb'
+require_relative './generate_name.rb'
+require_relative './generate_matrix.rb'
 
 
 class Point
@@ -69,6 +69,19 @@ class World
 
     def set_name(name)
         @name = name
+    end
+
+    def cycle_theme
+        available_themes = Constants::THEME.constants.map {|theme| Constants::THEME.const_get(theme)}
+
+        current_theme_index = available_themes.index(@theme)
+        next_theme_index = (current_theme_index + 1) % available_themes.length
+
+        set_theme(available_themes[next_theme_index])
+    end
+
+    def set_theme(theme)
+        @theme = theme
     end
 
     def draw(tile_size)

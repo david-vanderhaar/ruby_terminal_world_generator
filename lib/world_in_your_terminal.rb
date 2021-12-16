@@ -1,6 +1,6 @@
 require 'tty-prompt'
-require_relative './world_in_your_terminal/Display.rb'
-require_relative './world_in_your_terminal/Engine.rb'
+require_relative './world_in_your_terminal/display.rb'
+require_relative './world_in_your_terminal/engine.rb'
 
 class WorldInYourTerminal
     def explore

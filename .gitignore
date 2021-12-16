@@ -2,3 +2,4 @@
 *.gem
 *.gemspec
 DEPLOY.md
+exported_worlds/

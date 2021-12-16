@@ -1,6 +1,7 @@
 require 'tty-file'
 require 'date'
-require_relative './Action.rb'
+require_relative './sction.rb'
+require_relative './alert_system.rb'
 
 class Engine
     def initialize(prompt, display)
@@ -13,6 +14,7 @@ class Engine
         initialize_key_prompt
         while is_running
             display.draw
+            alerts.draw
             show_key_prompts
         end
     end
@@ -54,6 +56,7 @@ class Engine
             'z' => Action.new(world.method(:zoom_in)),
             'x' => Action.new(world.method(:zoom_out)),
             'n' => Action.new(method(:name_world)),
+            'c' => Action.new(world.method(:cycle_theme)),
             'e' => Action.new(method(:export_to_txt)),
             :up => Action.new(world.method(:scroll_up)), # scroll up
             :down => Action.new(world.method(:scroll_down)), # scroll down
@@ -81,6 +84,7 @@ class Engine
                 "z to zoom in",
                 "x to zoom out",
                 "n to rename this world",
+                "c to switch theme",
                 "e to save this world in text",
                 "q to quit",
                 ""
@@ -99,8 +103,10 @@ class Engine
         directory = "exported_worlds"
         extension = 'txt'
         file_name = "#{DateTime.now.strftime('%Y_%m_%d__%H%M%S')}__#{world.name}.txt".gsub!(" ","_")
+        location = "#{directory}/#{file_name}"
+        TTY::File.create_file(location, content)
 
-        TTY::File.create_file("#{directory}/#{file_name}", content)
+        alerts.add_message("Succesfully saved to #{location}")
     end
 
     def default_action
@@ -113,6 +119,10 @@ class Engine
 
     def display
         @display
+    end
+
+    def alerts
+        @alerts ||= AlertSystem.new
     end
 
     def world
