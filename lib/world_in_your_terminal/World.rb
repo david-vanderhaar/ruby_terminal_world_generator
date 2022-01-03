@@ -27,9 +27,6 @@ class World
     def initialize(theme)
         @theme = theme
         @pastel = Pastel.new
-        @max_x = 4
-        @max_y = 4
-        @max_z = 4
         regenerate
     end
 
@@ -264,7 +261,7 @@ class World
     end
 
     def add_to_x_level(amount, position)
-        new_x = (position.x + amount).clamp(-@max_x, @max_x)
+        new_x = (position.x + amount).clamp(-max_x, max_x)
         
         Point.new(
             new_x,
@@ -274,7 +271,7 @@ class World
     end
 
     def add_to_y_level(amount, position)
-        new_y = (position.y + amount).clamp(-@max_y, @max_y)
+        new_y = (position.y + amount).clamp(-max_y, max_y)
         
         Point.new(
             position.x,
@@ -284,13 +281,40 @@ class World
     end
 
     def add_to_z_level(amount, position)
-        new_z = (position.z + amount).clamp(0, @max_z)
+        new_z = (position.z + amount).clamp(0, max_z)
+        zooming_out = zooming_out?(amount)
         
         Point.new(
-            position.x,
-            position.y,
+            zooming_out ? 0 : position.x,
+            zooming_out ? 0 : position.y,
             new_z,
         )
+    end
+
+    def zooming_out?(amount)
+        return true if amount < 0
+
+        false
+    end
+
+    def max_x
+        scrollable? ? max_xy_scroll : 0
+    end
+    
+    def max_y
+        scrollable? ? max_xy_scroll : 0
+    end
+
+    def scrollable?
+        @current_position.z >= max_z
+    end
+
+    def max_xy_scroll
+        64
+    end
+
+    def max_z 
+        4
     end
 
     def generate_new_zoomed_in_map(position)

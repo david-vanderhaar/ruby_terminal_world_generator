@@ -80,7 +80,7 @@ class Engine
                 "",
                 "-----------------------",
                 "r to generate new world",
-                "arrow keys to explore",
+                world.scrollable? ? "arrow keys to explore" : "",
                 "z to zoom in",
                 "x to zoom out",
                 "n to rename this world",
