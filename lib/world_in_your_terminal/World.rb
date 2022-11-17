@@ -347,6 +347,15 @@ class World
         @matrix_map[position.to_s] = new_matrix
     end
 
+    def generate_new_perlin_matrix_with_offset(position)
+        new_matrix = GenerateMatrix.new.perlin_matrix(
+            current_matrix_width,
+            offset: {x: position.x, y: position.y}
+        )
+
+        @matrix_map[position.to_s] = new_matrix
+    end
+
     def generate_new_scrolled_right_map(position)
         unfilled_new_matrix = matrix.dup.map.with_index{ |row, y|
             new_row = row.dup
