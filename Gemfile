@@ -10,3 +10,5 @@ gem "tty-file", "= 0.10.0"
 gem "tty-prompt", "= 0.23.1"
 gem "tty-screen", "= 0.8.1"
 gem "tty-table", "= 0.12.0"
+
+gem "debug", "~> 1.6"

@@ -1,3 +1,4 @@
+require 'debug'
 require 'tty-table'
 require 'tty-box'
 require_relative './constants/tile_types.rb'
@@ -200,7 +201,121 @@ class World
         @current_position = new_position
     end
 
+    def select_matricies_at_x_and_z(matrix_map, position)
+        matrix_map.select do |key, _|
+            matrix_key_matches_x_and_z(key, position.x, position.z)
+        end
+    end
+
+    def select_matricies_at_y_and_z(matrix_map, position)
+        matrix_map.select do |key, _|
+            matrix_key_matches_y_and_z(key, position.y, position.z)
+        end
+    end
+
+    def matrix_key_matches_x_and_z(matrix_key, x, z)
+        key_x, key_y, key_z = matrix_key.split(',').map(&:to_i)
+        return x == key_x && z == key_z
+    end
+
+    def matrix_key_matches_y_and_z(matrix_key, y, z)
+        key_y, key_y, key_z = matrix_key.split(',').map(&:to_i)
+        return y == key_y && z == key_z
+    end
+
+    def transform_matrix_key_to_point(key)
+        Point.new(*key.split(',').map(&:to_i))
+    end
+
+    def fill_matrix_map_with(new_matricies)
+        new_matricies.each do |new_matrix|
+            @matrix_map[new_matrix[:key]] = new_matrix[:value]
+        end
+    end
+
+    def set_current_position(new_position)
+        @current_position = new_position
+    end
+
     def scroll_right
+        scroll_right_v2
+    end
+
+    def scroll_left
+        scroll_left_v2
+    end
+
+    def scroll_up
+        scroll_up_v2
+    end
+
+    def scroll_down
+        scroll_down_v2
+    end
+
+    def scroll_v2(
+        increment_position_method,
+        matrix_selector_method, 
+        create_matrix_in_direction_method
+    )
+        new_position = method(increment_position_method).call(@current_position)
+        new_x = new_position.x
+
+        matricies_to_scroll = method(matrix_selector_method).call(
+            @matrix_map,
+            @current_position
+        )
+
+        scrolled = matricies_to_scroll.map do |key, value|
+            matrix_position = transform_matrix_key_to_point(key)
+            next_position = method(increment_position_method).call(matrix_position)
+            new_key = @matrix_map[next_position.to_s]
+                .nil? ? next_position.to_s : nil
+
+            {
+                key: new_key, 
+                value: method(create_matrix_in_direction_method).call(value)
+            }
+        end
+
+        valid_scrolled = scrolled.reject{|item| item[:key].nil?}
+        fill_matrix_map_with(valid_scrolled)
+        set_current_position(new_position)
+    end
+
+    def scroll_right_v2
+        scroll_v2(
+            :increment_x_level,
+            :select_matricies_at_x_and_z,
+            :get_matrix_scrolled_right
+        )
+    end
+    
+    def scroll_left_v2
+        scroll_v2(
+            :decrement_x_level,
+            :select_matricies_at_x_and_z,
+            :get_matrix_scrolled_left
+        )
+    end
+    
+    def scroll_up_v2
+        scroll_v2(
+            :increment_y_level,
+            :select_matricies_at_y_and_z,
+            :get_matrix_scrolled_up
+        )
+    end
+    
+    def scroll_down_v2
+        scroll_v2(
+            :decrement_y_level,
+            :select_matricies_at_y_and_z,
+            :get_matrix_scrolled_down
+        )
+    end
+
+    def scroll_right_v1
         new_position = increment_x_level(@current_position)
         if !matrix_exists_in_position(new_position)
             generate_new_scrolled_right_map(new_position)
@@ -209,7 +324,7 @@ class World
         @current_position = new_position
     end
 
-    def scroll_left
+    def scroll_left_v1
         new_position = decrement_x_level(@current_position)
         if !matrix_exists_in_position(new_position)
             generate_new_scrolled_left_map(new_position)
@@ -218,7 +333,7 @@ class World
         @current_position = new_position
     end
     
-    def scroll_up
+    def scroll_up_v1
         new_position = increment_y_level(@current_position)
         if !matrix_exists_in_position(new_position)
             generate_new_scrolled_up_map(new_position)
@@ -227,7 +342,7 @@ class World
         @current_position = new_position
     end
     
-    def scroll_down
+    def scroll_down_v1
         new_position = decrement_y_level(@current_position)
         if !matrix_exists_in_position(new_position)
             generate_new_scrolled_down_map(new_position)
@@ -356,58 +471,88 @@ class World
         @matrix_map[position.to_s] = new_matrix
     end
 
+    def get_matrix_scrolled_right(matrix_to_scroll)
+        unfilled_new_matrix = expand_matrix_right(matrix_to_scroll)
+        fill_none_tiles(unfilled_new_matrix)
+    end
+
+    def get_matrix_scrolled_left(matrix_to_scroll)
+        unfilled_new_matrix = expand_matrix_left(matrix_to_scroll)
+        fill_none_tiles(unfilled_new_matrix)
+    end
+
+    def get_matrix_scrolled_up(matrix_to_scroll)
+        unfilled_new_matrix = expand_matrix_up(matrix_to_scroll)
+        fill_none_tiles(unfilled_new_matrix)
+    end
+
+    def get_matrix_scrolled_down(matrix_to_scroll)
+        unfilled_new_matrix = expand_matrix_down(matrix_to_scroll)
+        fill_none_tiles(unfilled_new_matrix)
+    end
+
     def generate_new_scrolled_right_map(position)
-        unfilled_new_matrix = matrix.dup.map.with_index{ |row, y|
+        unfilled_new_matrix = expand_matrix_right(matrix)
+        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
+        @matrix_map[position.to_s] = filled_new_matrix
+    end
+    
+    def generate_new_scrolled_left_map(position)
+        unfilled_new_matrix = expand_matrix_left(matrix)
+        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
+        @matrix_map[position.to_s] = filled_new_matrix
+    end
+
+    def generate_new_scrolled_up_map(position)
+        unfilled_new_matrix = expand_matrix_up(matrix)
+        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
+        @matrix_map[position.to_s] = filled_new_matrix
+    end
+    
+    def generate_new_scrolled_down_map(position)
+        unfilled_new_matrix = expand_matrix_down(matrix)
+        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
+        @matrix_map[position.to_s] = filled_new_matrix
+    end
+
+    def expand_matrix_right(matrix_to_expand)
+        matrix_to_expand.dup.map.with_index{ |row, y|
             new_row = row.dup
             new_row.shift
             new_row << Constants::TILE_TYPES[:NONE]
             
             new_row
         }
-
-        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
-
-        @matrix_map[position.to_s] = filled_new_matrix
     end
-    
-    def generate_new_scrolled_left_map(position)
-        unfilled_new_matrix = matrix.dup.map.with_index{ |row, y|
+
+    def expand_matrix_left(matrix_to_expand)
+        matrix_to_expand.dup.map.with_index{ |row, y|
             new_row = row.dup
             new_row.pop
             new_row.unshift(Constants::TILE_TYPES[:NONE])
             
             new_row
         }
-
-        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
-
-        @matrix_map[position.to_s] = filled_new_matrix
     end
 
-    def generate_new_scrolled_up_map(position)
+    def expand_matrix_up(matrix_to_expand)
         unfilled_new_matrix = []
-        matrix.dup.map.with_index{ |row, i|
-            unfilled_new_matrix << row.dup if i < (current_matrix_width - 1)
+        matrix_to_expand.dup.map.with_index{ |row, i|
+            unfilled_new_matrix << row.dup if i < (current_matrix_width() - 1)
         }
 
-        unfilled_new_matrix.unshift(new_row(current_matrix_width))
-
-        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
-
-        @matrix_map[position.to_s] = filled_new_matrix
+        unfilled_new_matrix.unshift(new_row(current_matrix_width()))
+        unfilled_new_matrix
     end
-    
-    def generate_new_scrolled_down_map(position)
+
+    def expand_matrix_down(matrix_to_expand)
         unfilled_new_matrix = []
-        matrix.dup.map.with_index{ |row, i|
+        matrix_to_expand.dup.map.with_index{ |row, i|
             unfilled_new_matrix << row.dup if i > 0
         }
 
         unfilled_new_matrix << new_row(current_matrix_width)
-
-        filled_new_matrix = fill_none_tiles(unfilled_new_matrix)
-
-        @matrix_map[position.to_s] = filled_new_matrix
+        unfilled_new_matrix
     end
 
     def expanded_row(zoom_length, current_row)
